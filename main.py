@@ -19,7 +19,7 @@ def clear():
     os.system("clear")
 
 # Generate a password and store it with the app name
-def generate(length=15):
+def generate(length):
     app = input("For which usage: ")
     psw = ''.join(random.choices(ascii_chars, k=length))
     clear()
