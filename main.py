@@ -5,7 +5,6 @@ import os
 import time
 import json
 
-
 print('''
 
 
@@ -25,24 +24,10 @@ print('''
 
         ''')
 
-
-
-ascii = [
-    ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
-    '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
-    'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_',
-    '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
-    'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~'
-]
-
-
-
-import random
-import json
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(SCRIPT_DIR, "data.json")
 
 ascii = [chr(i) for i in range(32, 127)]
-file = "data.json"
 
 def generate(lenght=15):
     app = input("For which usage: ")
@@ -55,10 +40,8 @@ def generate(lenght=15):
         "password": psw
     }
 
-    filename = "data.json"
-
-    if os.path.exists(filename):
-        with open(filename, "r") as f:
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
             try:
                 data = json.load(f)
             except json.JSONDecodeError:
@@ -68,18 +51,18 @@ def generate(lenght=15):
 
     data.append(entry)
 
-    with open(filename, "w") as f:
+    with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
-
-
 
 def clear():
     os.system("clear")
 
-
 def read():
-    file = "data.json"
-    with open(file, "r") as f:
+    if not os.path.exists(DATA_FILE):
+        print("No data available.\n")
+        return
+
+    with open(DATA_FILE, "r") as f:
         data = json.load(f)
         for i, entry in enumerate(data, 1):
             app = entry.get("app", "Inconnu")
@@ -87,26 +70,23 @@ def read():
             print(f"{i}. {app} → {psw}")
     print("\n")
 
-
-
-
 def menu():
     while True:
         print("1- Generate Password")
-        print("2- Wiew Password")
+        print("2- View Password")
         print("3- Leave")
 
         reply = input("Enter your choice: ")
 
-        if reply=="1":
+        if reply == "1":
             clear()
             generate()
             break
-        elif reply=="2":
+        elif reply == "2":
             clear()
             read()
             break
-        elif reply=="3":
+        elif reply == "3":
             print("--- See you soon ! ---")
             clear()
             break
@@ -117,4 +97,3 @@ def menu():
         clear()
 
 menu()
-
