@@ -6,10 +6,14 @@ import time
 import json
 import argparse
 
-# Get the directory where this script is located
-script_dir = os.path.dirname(os.path.abspath(__file__))
-# Define the path to data.json in the same directory as the script
-data_file = os.path.join(script_dir, "data.json")
+# Store data.json in ~/.psw/data.json to avoid permission issues
+home_dir = os.path.expanduser("~")
+psw_dir = os.path.join(home_dir, ".psw")
+
+if not os.path.exists(psw_dir):
+    os.makedirs(psw_dir)
+
+data_file = os.path.join(psw_dir, "data.json")
 
 # Characters to use in password generation
 ascii_chars = [chr(i) for i in range(32, 127)]
@@ -89,9 +93,7 @@ def menu():
 
         if reply == "1":
             clear()
-            length_str = input("Enter password length (default 15): ").strip()
-            length = int(length_str) if length_str.isdigit() else 15
-            generate(length)
+            generate(15)  # Default length when using menu (can be changed if needed)
         elif reply == "2":
             clear()
             read()
