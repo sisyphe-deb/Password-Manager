@@ -6,9 +6,13 @@ import time
 import json
 import argparse
 
+# Get the directory where this script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Define the path to data.json in the same directory as the script
+data_file = os.path.join(script_dir, "data.json")
+
 # Characters to use in password generation
 ascii_chars = [chr(i) for i in range(32, 127)]
-data_file = "data.json"
 
 # Clear terminal screen
 def clear():
@@ -63,15 +67,15 @@ def update():
     repo_url = "https://github.com/sisyphe-deb/Password-Manager"
     install_path = "/usr/local/bin/psw"
 
-    print("📡 Downloading latest version from GitHub...")
+    print("Downloading latest version from GitHub...")
 
     try:
         subprocess.run(["git", "clone", "--depth", "1", repo_url, "/tmp/psw-update"], check=True)
         subprocess.run(["sudo", "cp", "/tmp/psw-update/main.py", install_path], check=True)
         subprocess.run(["sudo", "chmod", "+x", install_path], check=True)
-        print("✅ Update complete.")
+        print("Update complete.")
     except subprocess.CalledProcessError:
-        print("❌ Update failed.")
+        print("Update failed.")
     finally:
         subprocess.run(["rm", "-rf", "/tmp/psw-update"])
 
