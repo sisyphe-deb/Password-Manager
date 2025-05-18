@@ -89,7 +89,9 @@ def menu():
 
         if reply == "1":
             clear()
-            generate()
+            length_str = input("Enter password length (default 15): ").strip()
+            length = int(length_str) if length_str.isdigit() else 15
+            generate(length)
         elif reply == "2":
             clear()
             read()
