@@ -9,5 +9,5 @@ chmod +x psw
 
 sudo mv psw "$INSTALL_PATH"
 
-echo "[✔] Commande 'psw' installée. Vous pouvez maintenant l'utiliser !"
+echo "You can use your psw-generator"
 
