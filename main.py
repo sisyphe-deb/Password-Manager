@@ -1,47 +1,31 @@
 #!/usr/bin/env python3
-
+import subprocess
 import random
 import os
 import time
 import json
+import argparse
 
-print('''
+# Characters to use in password generation
+ascii_chars = [chr(i) for i in range(32, 127)]
+data_file = "data.json"
 
+# Clear terminal screen
+def clear():
+    os.system("clear")
 
-
-
-         ____   __ _ ___ _____      _____  ____ __| |
-        | '_ \ / _` / __/ __\ \ /\ / / _ \| '__/ _` |
-        | |_) | (_| \__ \__ \\ V  V / (_) | | | (_| |
-        | .__/ \__,_|___/___/ \_/\_/ \___/|_|  \__,_|
-        |_|_ _  ___ _ __   ___ _ __ __ _| |_ ___  _ __
-        / _` |/ _ \ '_ \ / _ \ '__/ _` | __/ _ \| '__|
-        | (_| |  __/ | | |  __/ | | (_| | || (_) | |
-        \__, |\___|_| |_|\___|_|  \__,_|\__\___/|_|
-        |___/
-
-
-
-        ''')
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(SCRIPT_DIR, "data.json")
-
-ascii = [chr(i) for i in range(32, 127)]
-
-def generate(lenght=15):
+# Generate a password and store it with the app name
+def generate(length=15):
     app = input("For which usage: ")
-    psw = ''.join(random.choices(ascii, k=lenght))
+    psw = ''.join(random.choices(ascii_chars, k=length))
     clear()
     print(f"Generated password for {app} is: {psw}")
 
-    entry = {
-        "app": app,
-        "password": psw
-    }
+    entry = {"app": app, "password": psw}
 
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r") as f:
+    # Load existing data or initialize empty list
+    if os.path.exists(data_file):
+        with open(data_file, "r") as f:
             try:
                 data = json.load(f)
             except json.JSONDecodeError:
@@ -49,51 +33,93 @@ def generate(lenght=15):
     else:
         data = []
 
+    # Append new entry
     data.append(entry)
 
-    with open(DATA_FILE, "w") as f:
+    # Save data to JSON file
+    with open(data_file, "w") as f:
         json.dump(data, f, indent=4)
 
-def clear():
-    os.system("clear")
-
+# Display all saved passwords
 def read():
-    if not os.path.exists(DATA_FILE):
-        print("No data available.\n")
-        return
-
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
+    if os.path.exists(data_file):
+        with open(data_file, "r") as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                print("The file is empty or corrupted.")
+                return
+        print("Here are the saved passwords:\n")
         for i, entry in enumerate(data, 1):
-            app = entry.get("app", "Inconnu")
-            psw = entry.get("password", "Non défini")
+            app = entry.get("app", "Unknown")
+            psw = entry.get("password", "Not defined")
             print(f"{i}. {app} → {psw}")
-    print("\n")
+        print("\n")
+    else:
+        print("No password file found.")
 
+# Update the CLI tool from GitHub
+def update():
+    repo_url = "https://github.com/sisyphe-deb/Password-Manager"
+    install_path = "/usr/local/bin/psw"
+
+    print("📡 Downloading latest version from GitHub...")
+
+    try:
+        subprocess.run(["git", "clone", "--depth", "1", repo_url, "/tmp/psw-update"], check=True)
+        subprocess.run(["sudo", "cp", "/tmp/psw-update/main.py", install_path], check=True)
+        subprocess.run(["sudo", "chmod", "+x", install_path], check=True)
+        print("✅ Update complete.")
+    except subprocess.CalledProcessError:
+        print("❌ Update failed.")
+    finally:
+        subprocess.run(["rm", "-rf", "/tmp/psw-update"])
+
+# Interactive text menu
 def menu():
     while True:
         print("1- Generate Password")
-        print("2- View Password")
-        print("3- Leave")
-
+        print("2- View Passwords")
+        print("3- Exit")
         reply = input("Enter your choice: ")
 
         if reply == "1":
             clear()
             generate()
-            break
         elif reply == "2":
             clear()
             read()
-            break
         elif reply == "3":
-            print("--- See you soon ! ---")
-            clear()
+            print("--- See you soon! ---")
             break
         else:
-            clear()
             print("--- Invalid choice ---")
             time.sleep(1)
-        clear()
+            clear()
 
-menu()
+# Entry point with CLI support
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Password manager CLI")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # generate
+    gen_parser = subparsers.add_parser("generate", help="Generate a password")
+    gen_parser.add_argument("-l", "--length", type=int, default=15, help="Length of the password")
+
+    # read
+    subparsers.add_parser("read", help="Show saved passwords")
+
+    # update
+    subparsers.add_parser("update", help="Update the tool from GitHub")
+
+    args = parser.parse_args()
+
+    if args.command == "generate":
+        generate(args.length)
+    elif args.command == "read":
+        read()
+    elif args.command == "update":
+        update()
+    else:
+        # If no CLI command, show interactive menu
+        menu()
